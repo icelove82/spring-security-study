@@ -6,16 +6,23 @@ import com.ymh.springsecuritystudy.repo.RoleRepo;
 import com.ymh.springsecuritystudy.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
 
@@ -49,5 +56,27 @@ public class UserServiceImpl implements UserService {
     public List<User> getUsers() {
         log.info("Fetching all users");
         return userRepo.findAll();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepo.findByUsername(username);
+        if (user == null) {
+            log.error("User not found in db");
+            throw new UsernameNotFoundException("User not found in db");
+        } else {
+            log.info("User found in db: {}", username);
+        }
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+//        Collection<SimpleGrantedAuthority> authorities =
+//                user.getRoles().stream()
+//                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+//                        .collect(Collectors.toList());
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities);
     }
 }
