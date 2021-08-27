@@ -10,10 +10,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,10 +25,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public User saveUser(User user) {
         log.info("Saving new user {} to the db", user.getName());
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         return userRepo.save(user);
     }
 
@@ -67,12 +69,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             log.info("User found in db: {}", username);
         }
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
-//        Collection<SimpleGrantedAuthority> authorities =
-//                user.getRoles().stream()
-//                        .map(role -> new SimpleGrantedAuthority(role.getName()))
-//                        .collect(Collectors.toList());
+//        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+//        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+        Collection<SimpleGrantedAuthority> authorities =
+                user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+                        .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

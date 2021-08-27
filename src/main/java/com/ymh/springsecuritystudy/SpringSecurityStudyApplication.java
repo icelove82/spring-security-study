@@ -18,7 +18,7 @@ public class SpringSecurityStudyApplication {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
