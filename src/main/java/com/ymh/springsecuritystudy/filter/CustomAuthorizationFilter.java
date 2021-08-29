@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 public class CustomAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/login")) {
+        if (request.getServletPath().equals("/login") || request.getServletPath().equals("/api/token/refresh")) {
             log.info("Servlet path: {}", request.getServletPath());
             log.info("Context path: {}", request.getContextPath());
             log.info("Request path: {}", request.getRequestURL());
@@ -55,6 +55,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     filterChain.doFilter(request, response);
                 } catch (Exception e) {
                     log.error("Error: {}", e.getMessage());
+                    response.addHeader("ERROR", e.getMessage());
                     response.setStatus(FORBIDDEN.value());
                 }
             } else {
