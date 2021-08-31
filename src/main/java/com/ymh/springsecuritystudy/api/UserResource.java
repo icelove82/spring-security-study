@@ -24,8 +24,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("api")
+@RequiredArgsConstructor
 public class UserResource {
     private final UserService userService;
 

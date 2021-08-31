@@ -9,7 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import static javax.persistence.FetchType.EAGER;
@@ -28,5 +27,5 @@ public class User {
     private String username;
     private String password;
     @ManyToMany(fetch = EAGER)
-    private Collection<Role> roles = new ArrayList<>();
+    private Collection<Role> roles;
 }
